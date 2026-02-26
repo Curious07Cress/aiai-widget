@@ -1,0 +1,60 @@
+{
+  "id": "aiai-health-dashboard",
+  "version": "1.0.0",
+  "title": "AI Assistant Health Dashboard",
+  "description": "Component health monitoring and diagnostics for AI Assistant infrastructure",
+  "icon": "mdi-monitor-dashboard",
+  "category": "monitoring",
+
+  "author": {
+    "name": "AI Assistant Team",
+    "email": "ai-assistant@3ds.com"
+  },
+
+  "entryPoint": "index.html",
+
+  "permissions": [
+    {
+      "type": "api",
+      "resource": "3dspace",
+      "reason": "Required to call AIAI, Jaeger, and MLI APIs with SSO authentication"
+    },
+    {
+      "type": "storage",
+      "resource": "preferences",
+      "reason": "Store user preferences for dashboard configuration"
+    }
+  ],
+
+  "preferences": [
+    {
+      "name": "aiaiUrl",
+      "label": "AIAI API URL",
+      "type": "text",
+      "default": "https://devopsyivwvbl820289-euw1-devprol50-aiai.3dx-staging.3ds.com"
+    },
+    {
+      "name": "refreshInterval",
+      "label": "Auto-refresh interval (seconds)",
+      "type": "number",
+      "default": 30
+    }
+  ],
+
+  "size": {
+    "default": {
+      "width": 1200,
+      "height": 800
+    },
+    "min": {
+      "width": 800,
+      "height": 600
+    }
+  },
+
+  "tags": ["monitoring", "health", "diagnostics", "ai", "assistant"],
+
+  "supportedPlatforms": [
+    "3DDashboard"
+  ]
+}

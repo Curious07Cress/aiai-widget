@@ -1,0 +1,35 @@
+{
+  "ssh": {
+    "bastion_host": "ows-148-253-122-84.eu-west-2.compute.outscale.com",
+    "target_host": "10.0.152.241",
+    "key_path": "C:/Users/yiv/.ssh/AccessKeyDEVOPSYIVWVBL23215154.pem",
+    "user": "root"
+  },
+  "api": {
+    "base_url": "https://devopsyivwvbl23215154-euw1-devprol49-aiai.3dx-staging.3ds.com",
+    "endpoints": {
+      "mechanical_designer": "/api/v1/assistants/mechanical_designer/submit",
+      "register_agent": "/api/v1/agents/{agent_name}/register"
+    }
+  },
+  "services": {
+    "ai_assembly_structure": {
+      "path": "/home/poduser/workflow_executor/projects/ai-assembly-structure",
+      "port": 5310,
+      "venv": ".venv/bin/python3",
+      "pythonpath": "/home/poduser/workflow_executor/projects/ai-assistant-main:/home/poduser/workflow_executor/projects/ai-assembly-structure"
+    },
+    "ai_assistant_main": {
+      "path": "/home/poduser/workflow_executor/projects/ai-assistant-main",
+      "port": 5210,
+      "venv": ".venv/bin/python3"
+    }
+  },
+  "registry_paths": {
+    "local_agents": "e:\\repo\\ai-assistant-assem-struct\\ai-assembly-structure\\ai_agent\\src\\resources\\registry\\agents",
+    "mechanical_designer": "mechanical_designer_agents/entrypoint_mechanical_designer_1.0.0/agents.json",
+    "asmstruct": "asmstruct_agents/entrypoint_asmstruct_1.0.0/agents.json",
+    "dwggen": "dwggen_agents/entrypoint_dwggen_1.0.0/agents.json",
+    "whatswrong": "whatswrong_agents/entrypoint_whatswrong_1.0.0/agents.json"
+  }
+}

@@ -1,0 +1,77 @@
+Testing AI agents can cover multiple aspects:
+
+Unit Tests: to make sure that the agent/tool code executes without failure in an isolated environment
+Integration Tests: to ensure that the assistant/agent/tool can be integrated in a complex environment
+Quality Tests: to evaluate responses and check how relevant they are
+Performance Tests: to determine if the assistant overloads or not the service
+ 
+
+The manufacturing operation pythonMO only supports Unit Tests (R2025xRD04), but it will be able to support integration tests in the future. Quality and Performance tests are also features that will come to the service in the next releases.
+
+ 
+
+Unit Tests
+Unit tests are run on the CD component level is an isolated environment where it's not possible to access external services. All calls to agents/tool/external services must be mocked (except for the agent/tool you're testing)
+
+Mocking external services helps determine if the agent can be executed if it receives the correct responses from these providers.
+
+One framework that provides a way to create and verify interactions contracts between microservices is Pact IO.
+
+The consumers can be:
+
+agents
+tools
+The providers can be:
+
+tools
+datasources
+external services
+
+Pact IO testing
+Examples of Pact IO tests:
+
+ai-assistant-aura: In these tests, we define pacts between a consumer agent (aura entrypoint) and provider agents / tools / llm (rag agent, language detection, glossary retriever, mli service ...) and check if the entrypoint executes correctly
+ 
+
+Integration Tests
+Integration tests aim to test the interactions between agents, tools, datasources and external services.
+
+These tests can only be run on a deployed sandbox, not during the CD component build.
+
+To run integration tests, you must follow these steps:
+
+Deploy a sandbox with (AIAssistantInfra + services your assistant needs) on your component stage
+Update the sandbox with your code and assistant metadata (See How to update a sandbox)
+Configure the integration tests to use your sandbox url
+Run the integration tests
+These tests can be implemented with pytest and using a httpx client to perform http calls to the assistant.
+
+ 
+
+Examples of Integration tests:
+
+ai-assistant-aura: We perform http requests to Aura assistants (after configuring all external services on the target sandbox) and validate the output against a json schema
+ 
+
+Quality Tests
+The goal is to evaluate the agents / tools using quality metrics to check how relevant the responses are.
+
+These tests can be run like the integration tests on a deployed sandbox and following the same steps.
+
+The results can be found on a configured mlflow instance where metrics are logged and runs are traced with all execution steps.
+
+
+Metrics Logging in MLFlow
+
+Tracing in MLFlow
+Examples of Quality tests:
+
+ai-assistant-aura: We evaluate a retriever using a ground truth dataset (of generated questions) and log the results to MLFlow.
+ 
+
+Performance Tests
+Testing the assistant under the expected traffic is important to ensure its reliability.
+
+These tests can be run locally using JMeter.
+
+An integration with PCS tools provided by the platform will be done in the future

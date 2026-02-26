@@ -1,0 +1,58 @@
+{
+    "name": "aiai-health-dashboard",
+    "version": "1.0.0",
+    "description": "AI Assistant Health Dashboard Widget for 3DDashboard",
+    "main": "index.html",
+    "config": {
+        "publicPath": null
+    },
+    "scripts": {
+        "postinstall": "node webpack/postInstall.js",
+        "build": "set NODE_OPTIONS=--openssl-legacy-provider && webpack --config ./webpack/webpack.config.prod.js",
+        "start": "set NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --config ./webpack/webpack.config.dev.js --open",
+        "lint": "eslint src/**/*.{js,vue}",
+        "lintFix": "eslint src/**/*.{js,vue} --fix"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Curious07Cress/aiai-widget.git"
+    },
+    "author": "AI Assistant Team",
+    "license": "MIT",
+    "devDependencies": {
+        "@babel/core": "7.12.3",
+        "@babel/polyfill": "7.12.1",
+        "@babel/preset-env": "7.12.1",
+        "@mdi/font": "5.8.55",
+        "@vue/devtools": "5.3.3",
+        "babel-loader": "8.2.1",
+        "clean-webpack-plugin": "3.0.0",
+        "copy-webpack-plugin": "6.3.0",
+        "css-loader": "3.6.0",
+        "deepmerge": "4.2.2",
+        "eslint": "7.13.0",
+        "eslint-config-prettier": "6.15.0",
+        "eslint-config-vuetify": "0.6.1",
+        "eslint-loader": "4.0.2",
+        "eslint-plugin-html": "6.1.1",
+        "eslint-plugin-json": "2.1.2",
+        "eslint-plugin-vue": "7.1.0",
+        "file-loader": "6.2.0",
+        "sass": "1.29.0",
+        "sass-loader": "10.1.0",
+        "style-loader": "2.0.0",
+        "vue-loader": "15.9.5",
+        "vue-template-compiler": "2.6.12",
+        "vuetify-loader": "1.6.0",
+        "webpack": "4.44.2",
+        "webpack-cli": "3.3.12",
+        "webpack-dev-server": "3.11.0",
+        "webpack-merge": "5.4.0"
+    },
+    "dependencies": {
+        "@widget-lab/platform-connectors": "^3.4.3",
+        "vue": "2.6.12",
+        "vuetify": "2.3.17",
+        "vuex": "3.5.1"
+    }
+}
