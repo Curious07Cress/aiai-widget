@@ -236,7 +236,7 @@ export const aiaiService = {
         const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody),
+            body: requestBody,  // Pass raw object - callBackendProxy will stringify
             timeout: 60000
         };
 
