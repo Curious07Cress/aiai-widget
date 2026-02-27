@@ -7,7 +7,7 @@ Provides endpoints for checking service health status.
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 
-from ..models.health import HealthCheckResponse, ServiceHealth
+from ..models.health import HealthCheckResponse, ServiceHealth, ServiceStatus
 from ..services.health_aggregator import HealthAggregator
 
 router = APIRouter(prefix="/api/health", tags=["health"])
@@ -16,13 +16,24 @@ router = APIRouter(prefix="/api/health", tags=["health"])
 health_aggregator = HealthAggregator()
 
 
+def _map_status_to_frontend(status) -> str:
+    """Map backend status enum to frontend-expected strings."""
+    mapping = {
+        "ok": "healthy",
+        "degraded": "degraded",
+        "down": "unhealthy",
+        "unknown": "unknown"
+    }
+    status_str = str(status).lower() if hasattr(status, 'value') else str(status).lower()
+    return mapping.get(status_str, "unknown")
+
+
 @router.get(
     "/all",
-    response_model=HealthCheckResponse,
     summary="Check all services",
-    description="Returns health status of all monitored services.",
+    description="Returns health status of all monitored services in frontend-compatible format.",
 )
-async def check_all_health() -> HealthCheckResponse:
+async def check_all_health():
     """
     Check health of all monitored services.
 
@@ -31,8 +42,33 @@ async def check_all_health() -> HealthCheckResponse:
     - MLI Service
     - MCP Proxy
     - Jaeger (for trace availability)
+
+    Response format is transformed to match frontend expectations:
+    - Keys: "aiai" instead of "aiai_api"
+    - Fields: "response_time_ms" instead of "latency_ms"
+    - Status: "healthy/unhealthy/degraded/unknown" instead of "ok/down/..."
     """
-    return await health_aggregator.check_all()
+    result = await health_aggregator.check_all()
+
+    # Get AIAI service or create unknown fallback
+    aiai_service = result.services.get("aiai_api")
+    if not aiai_service:
+        aiai_service = ServiceHealth(status=ServiceStatus.UNKNOWN)
+
+    # Transform to frontend-expected format
+    return {
+        "overall": _map_status_to_frontend(result.overall),
+        "timestamp": result.timestamp.isoformat(),
+        "services": {
+            "aiai": {
+                "status": _map_status_to_frontend(aiai_service.status),
+                "response_time_ms": aiai_service.latency_ms,
+                "endpoint": str(health_aggregator.settings.aiai_base_url),
+                "last_check": aiai_service.last_checked.isoformat(),
+                "details": aiai_service.details or {}
+            }
+        }
+    }
 
 
 @router.get(
