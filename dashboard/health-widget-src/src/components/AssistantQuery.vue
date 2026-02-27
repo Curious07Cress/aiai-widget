@@ -25,15 +25,30 @@
           />
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="conversationId"
-            label="Conversation ID (optional)"
-            outlined
-            dense
-            prepend-inner-icon="mdi-message-text-outline"
-            :disabled="loading"
-            placeholder="Leave empty for new conversation"
-          />
+          <!-- Conversation Controls -->
+          <div class="d-flex align-center" style="height: 40px;">
+            <v-btn
+              small
+              outlined
+              color="primary"
+              @click="copyConversationId"
+              :disabled="loading"
+              class="mr-2"
+            >
+              <v-icon left small>mdi-content-copy</v-icon>
+              Copy ID
+            </v-btn>
+            <v-btn
+              small
+              outlined
+              color="secondary"
+              @click="newConversation"
+              :disabled="loading"
+            >
+              <v-icon left small>mdi-plus-circle</v-icon>
+              New
+            </v-btn>
+          </div>
         </v-col>
       </v-row>
 
@@ -255,6 +270,26 @@
         <p class="mt-4 text-subtitle-1">Submit a query to see results</p>
       </div>
     </v-card-text>
+
+    <!-- Notification Snackbar -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      top
+      right
+    >
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-card>
 </template>
 
@@ -328,6 +363,11 @@ export default {
       error: null,
       response: null,
       viewMode: 'tree',
+      snackbar: {
+        show: false,
+        message: '',
+        color: 'success'
+      },
 
       // API URLs (loaded from widget preferences)
       aiaiUrl: 'https://devopsyivwvbl820289-euw1-devprol50-aiai.3dx-staging.3ds.com',
@@ -352,6 +392,9 @@ export default {
 
   mounted() {
     console.log('[AssistantQuery] Component mounted');
+
+    // Generate initial conversation ID
+    this.generateConversationId();
 
     // Load AIAI URL from widget preferences if available
     if (typeof widget !== 'undefined' && widget.getValue) {
@@ -385,7 +428,7 @@ export default {
 
         // Transform to select options format (use assistant__ prefixed properties)
         this.assistants = assistantList.map(asst => ({
-          text: asst.assistant__description || asst.assistant__name || asst.assistant__id,
+          text: asst.assistant__name || asst.assistant__id,
           value: asst.assistant__name || asst.assistant__id
         }));
 
@@ -407,6 +450,63 @@ export default {
         this.loadingAssistants = false;
       }
     },
+
+    /**
+     * Generate a new conversation ID (UUIDv4)
+     */
+    generateConversationId() {
+      this.conversationId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      console.log('[AssistantQuery] Generated conversation ID:', this.conversationId);
+    },
+
+    /**
+     * Copy conversation ID to clipboard
+     */
+    async copyConversationId() {
+      try {
+        await navigator.clipboard.writeText(this.conversationId);
+        console.log('[AssistantQuery] Copied conversation ID to clipboard');
+
+        this.snackbar = {
+          show: true,
+          message: `Conversation ID copied: ${this.conversationId.substring(0, 8)}...`,
+          color: 'success'
+        };
+      } catch (err) {
+        console.error('[AssistantQuery] Failed to copy to clipboard:', err);
+
+        this.snackbar = {
+          show: true,
+          message: 'Failed to copy conversation ID',
+          color: 'error'
+        };
+      }
+    },
+
+    /**
+     * Start a new conversation
+     */
+    newConversation() {
+      console.log('[AssistantQuery] Starting new conversation');
+
+      // Generate new conversation ID
+      this.generateConversationId();
+
+      // Clear previous results
+      this.response = null;
+      this.error = null;
+
+      this.snackbar = {
+        show: true,
+        message: 'New conversation started',
+        color: 'info'
+      };
+    },
+
     /**
      * Submit query to assistant
      */

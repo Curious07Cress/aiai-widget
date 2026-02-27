@@ -1,8 +1,24 @@
 <template>
-  <v-card :color="statusColor" dark class="status-card">
+  <v-card
+    :color="statusColor"
+    dark
+    class="status-card"
+    @click="handleClick"
+    :style="{ cursor: 'pointer' }"
+  >
     <v-card-title class="pb-2">
       <v-icon left large>{{ icon }}</v-icon>
       <span class="text-h6">{{ title }}</span>
+      <v-spacer />
+      <v-btn
+        icon
+        small
+        @click.stop="handleRefresh"
+        color="white"
+        class="refresh-btn"
+      >
+        <v-icon small>mdi-refresh</v-icon>
+      </v-btn>
     </v-card-title>
 
     <v-card-text class="pt-2">
@@ -127,6 +143,29 @@ export default {
         return JSON.stringify(value);
       }
       return String(value);
+    },
+
+    /**
+     * Handle card click - emit event to parent
+     */
+    handleClick() {
+      console.log('[StatusCard] Card clicked:', this.title);
+      this.$emit('card-click', {
+        title: this.title,
+        status: this.status,
+        details: this.details,
+        timestamp: this.timestamp
+      });
+    },
+
+    /**
+     * Handle refresh button click - emit event to parent
+     */
+    handleRefresh() {
+      console.log('[StatusCard] Refresh clicked:', this.title);
+      this.$emit('card-refresh', {
+        title: this.title
+      });
     }
   }
 };
@@ -141,6 +180,15 @@ export default {
 .status-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.refresh-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.refresh-btn:hover {
+  opacity: 1;
 }
 
 .opacity-80 {
