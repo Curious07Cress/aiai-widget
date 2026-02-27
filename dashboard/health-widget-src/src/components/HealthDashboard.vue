@@ -51,52 +51,14 @@
         </v-col>
       </v-row>
 
-      <!-- Health Status Cards -->
+      <!-- Compact Status Bar -->
       <v-row v-else-if="healthData">
-        <!-- Overall Status -->
-        <v-col cols="12" md="4">
-          <status-card
-            title="Overall Status"
-            :status="healthData.overall"
-            icon="mdi-heart-pulse"
-            :timestamp="healthData.timestamp"
-            @card-click="showDetailsDialog"
-            @card-refresh="refreshService"
+        <v-col cols="12">
+          <status-bar
+            :health-data="healthData"
+            :loading="loading"
+            @refresh="refreshHealth"
           />
-        </v-col>
-
-        <!-- AIAI Service -->
-        <v-col cols="12" md="4">
-          <status-card
-            title="AIAI Service"
-            :status="(healthData.services && healthData.services.aiai && healthData.services.aiai.status) || 'unknown'"
-            icon="mdi-robot"
-            :details="healthData.services && healthData.services.aiai"
-            @card-click="showDetailsDialog"
-            @card-refresh="refreshService"
-          />
-        </v-col>
-
-        <!-- MCP Service -->
-        <v-col cols="12" md="4">
-          <div class="position-relative">
-            <v-chip
-              small
-              color="warning"
-              class="mcp-dev-tag"
-              label
-            >
-              Under Development
-            </v-chip>
-            <status-card
-              title="MCP Service"
-              :status="(healthData.services && healthData.services.mcp && healthData.services.mcp.status) || 'unknown'"
-              icon="mdi-api"
-              :details="healthData.services && healthData.services.mcp"
-              @card-click="showDetailsDialog"
-              @card-refresh="refreshService"
-            />
-          </div>
         </v-col>
       </v-row>
 
@@ -173,53 +135,12 @@
       </v-card>
     </v-dialog>
 
-    <!-- Service Details Dialog -->
-    <v-dialog v-model="showDetails" max-width="700px">
-      <v-card>
-        <v-card-title class="d-flex align-center">
-          <v-icon left large :color="detailsData.statusColor">{{ detailsData.icon }}</v-icon>
-          {{ detailsData.title }}
-          <v-spacer />
-          <v-chip :color="detailsData.statusColor" dark small>
-            {{ detailsData.status }}
-          </v-chip>
-        </v-card-title>
-        <v-divider />
-        <v-card-text class="pt-4">
-          <div v-if="detailsData.timestamp" class="mb-3">
-            <v-icon small left>mdi-clock-outline</v-icon>
-            <strong>Last Updated:</strong> {{ formatTimestamp(detailsData.timestamp) }}
-          </div>
-
-          <div v-if="detailsData.details">
-            <v-simple-table dense>
-              <template v-slot:default>
-                <tbody>
-                  <tr v-for="(value, key) in detailsData.details" :key="key">
-                    <td class="font-weight-bold">{{ formatDetailKey(key) }}</td>
-                    <td>{{ formatDetailValue(value) }}</td>
-                  </tr>
-                </tbody>
-              </template>
-            </v-simple-table>
-          </div>
-
-          <v-alert v-else type="info" text class="mt-2">
-            No additional details available for this service.
-          </v-alert>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="showDetails = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-app>
 </template>
 
 <script>
 import { aiaiService, healthService, getConnectionMode } from '../services/apiService';
-import StatusCard from './StatusCard.vue';
+import StatusBar from './StatusBar.vue';
 import ServiceInfo from './ServiceInfo.vue';
 import AssistantQuery from './AssistantQuery.vue';
 
@@ -227,7 +148,7 @@ export default {
   name: 'HealthDashboard',
 
   components: {
-    StatusCard,
+    StatusBar,
     ServiceInfo,
     AssistantQuery
   },
@@ -251,17 +172,6 @@ export default {
       settingsForm: {
         aiaiUrl: '',
         refreshInterval: 30
-      },
-
-      // Details dialog
-      showDetails: false,
-      detailsData: {
-        title: '',
-        status: '',
-        statusColor: '',
-        icon: '',
-        timestamp: null,
-        details: null
       }
     };
   },
@@ -415,91 +325,6 @@ export default {
       this.showSettings = false;
     },
 
-    /**
-     * Show details dialog for a service
-     */
-    showDetailsDialog(cardData) {
-      console.log('[HealthDashboard] Showing details for:', cardData.title);
-
-      // Determine icon based on title
-      let icon = 'mdi-information';
-      if (cardData.title.includes('Overall')) {
-        icon = 'mdi-heart-pulse';
-      } else if (cardData.title.includes('AIAI')) {
-        icon = 'mdi-robot';
-      } else if (cardData.title.includes('MCP')) {
-        icon = 'mdi-api';
-      }
-
-      // Determine status color
-      const statusLower = cardData.status.toLowerCase();
-      let statusColor = 'grey';
-      if (statusLower === 'healthy' || statusLower === 'ok') {
-        statusColor = 'success';
-      } else if (statusLower === 'degraded' || statusLower === 'warning') {
-        statusColor = 'warning';
-      } else if (statusLower === 'unhealthy' || statusLower === 'error') {
-        statusColor = 'error';
-      }
-
-      this.detailsData = {
-        title: cardData.title,
-        status: cardData.status.toUpperCase(),
-        statusColor: statusColor,
-        icon: icon,
-        timestamp: cardData.timestamp,
-        details: cardData.details
-      };
-
-      this.showDetails = true;
-    },
-
-    /**
-     * Refresh a specific service
-     */
-    async refreshService(cardData) {
-      console.log('[HealthDashboard] Refreshing service:', cardData.title);
-      await this.refreshHealth();
-    },
-
-    /**
-     * Format timestamp for display
-     */
-    formatTimestamp(timestamp) {
-      if (!timestamp) return 'N/A';
-
-      try {
-        const date = new Date(timestamp);
-        return date.toLocaleString();
-      } catch (error) {
-        return timestamp;
-      }
-    },
-
-    /**
-     * Format detail key for display
-     */
-    formatDetailKey(key) {
-      return key
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase());
-    },
-
-    /**
-     * Format detail value for display
-     */
-    formatDetailValue(value) {
-      if (typeof value === 'boolean') {
-        return value ? 'Yes' : 'No';
-      }
-      if (value === null || value === undefined) {
-        return 'N/A';
-      }
-      if (typeof value === 'object') {
-        return JSON.stringify(value, null, 2);
-      }
-      return String(value);
-    }
   }
 };
 </script>
@@ -516,16 +341,5 @@ export default {
 .v-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.position-relative {
-  position: relative;
-}
-
-.mcp-dev-tag {
-  position: absolute;
-  top: -8px;
-  right: 8px;
-  z-index: 1;
 }
 </style>
