@@ -95,6 +95,7 @@ function isWidgetTrusted() {
 async function callWithFallback(url, options = {}, backendUrl = null, proxyPath = null) {
     // Check trusted mode DYNAMICALLY at call time
     const isTrusted = isWidgetTrusted();
+    console.log(`[ApiService] callWithFallback - isTrusted: ${isTrusted}, backendUrl: ${backendUrl}, proxyPath: ${proxyPath}`);
 
     // Strategy 1: Try direct API call if in trusted mode
     if (isTrusted) {
@@ -209,6 +210,7 @@ export const aiaiService = {
      * @returns {Promise<Array>} List of assistants
      */
     async getAssistants(aiaiUrl, backendUrl, namespace = '') {
+        console.log(`[ApiService] getAssistants called with aiaiUrl: ${aiaiUrl}, backendUrl: ${backendUrl}`);
         const url = `${aiaiUrl}/api/v1/assistants`;
 
         // Direct call uses GET (AIAI accepts both GET and POST)
@@ -217,7 +219,14 @@ export const aiaiService = {
 
         const proxyPath = `/api/aiai/assistants?aiai_url=${encodeURIComponent(aiaiUrl)}${namespace ? `&assistant_namespace=${namespace}` : ''}`;
 
-        return await callWithFallback(url, options, backendUrl, proxyPath);
+        try {
+            const result = await callWithFallback(url, options, backendUrl, proxyPath);
+            console.log('[ApiService] getAssistants succeeded');
+            return result;
+        } catch (error) {
+            console.error('[ApiService] getAssistants failed:', error);
+            throw error;
+        }
     },
 
     /**

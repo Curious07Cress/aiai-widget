@@ -396,11 +396,13 @@ export default {
     // Generate initial conversation ID
     this.generateConversationId();
 
-    // Load AIAI URL from widget preferences if available
+    // Load URLs from widget preferences if available
     if (typeof widget !== 'undefined' && widget.getValue) {
       try {
         this.aiaiUrl = widget.getValue('aiaiUrl') || this.aiaiUrl;
+        this.backendUrl = widget.getValue('backendUrl') || this.backendUrl;
         console.log('[AssistantQuery] Loaded aiaiUrl from preferences:', this.aiaiUrl);
+        console.log('[AssistantQuery] Loaded backendUrl from preferences:', this.backendUrl);
       } catch (error) {
         console.warn('[AssistantQuery] Could not load widget preferences:', error);
       }
