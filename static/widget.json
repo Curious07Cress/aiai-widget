@@ -34,6 +34,12 @@
       "default": "https://devopsyivwvbl820289-euw1-devprol50-aiai.3dx-staging.3ds.com"
     },
     {
+      "name": "backendUrl",
+      "label": "Backend Proxy URL",
+      "type": "text",
+      "default": "http://localhost:8080"
+    },
+    {
       "name": "refreshInterval",
       "label": "Auto-refresh interval (seconds)",
       "type": "number",
